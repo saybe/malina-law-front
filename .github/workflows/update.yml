@@ -1,0 +1,81 @@
+name: Обновить данные и задеплоить сайт
+
+# По расписанию раз в час и вручную из вкладки Actions.
+on:
+  schedule:
+    - cron: '17 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+# Не отменяем предыдущий запуск, если он ещё идёт: два деплоя одновременно
+# GitHub Pages не любит.
+concurrency:
+  group: pages-deploy
+  cancel-in-progress: false
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Забрать код
+        uses: actions/checkout@v4
+
+      - name: Установить Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Установить зависимости
+        run: npm ci
+
+      # Если портал недоступен из раннера, шаг падает, но данные не портятся:
+      # следующие шаги соберут сайт с тем файлом, что уже лежит в репозитории.
+      - name: Скачать акты с официального портала
+        id: fetch
+        continue-on-error: true
+        run: node scripts/fetch.mjs
+
+      - name: Сообщить о проблеме с источником
+        if: steps.fetch.outcome == 'failure'
+        run: |
+          echo "::warning::Не удалось скачать данные с publication.pravo.gov.ru."
+          echo "::warning::Публикуется предыдущая версия файла public/data/acts.json."
+          echo "::warning::Если это повторяется — вероятно, раннер не достаёт до .gov.ru по HTTP."
+
+      - name: Проверить данные
+        if: steps.fetch.outcome == 'success'
+        run: node scripts/check.mjs
+
+      - name: Собрать сайт
+        run: npm run build
+
+      - name: Сохранить обновлённые данные в репозитории
+        run: |
+          if git diff --quiet -- public/data/acts.json; then
+            echo "Данные не изменились — коммит не нужен."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/data/acts.json
+          git commit -m "data: акты на $(date -u +%Y-%m-%d\ %H:%M)\ UTC"
+          git pull --rebase --autostash origin master
+          git push origin HEAD:master
+
+      - name: Подготовить GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Загрузить артефакт
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Опубликовать
+        uses: actions/deploy-pages@v4
