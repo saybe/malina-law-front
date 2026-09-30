@@ -1,4 +1,4 @@
-import { formatDate } from '../lib/acts.js'
+import { formatDateShort } from '../lib/acts.js'
 
 const CATEGORY_CLASS = {
   'Федеральный закон': 'law',
@@ -23,12 +23,12 @@ export default function ActCard({ act, favorite, onToggleFavorite }) {
       <div className="card__head">
         <span className={`badge badge--${tone}`}>{act.category}</span>
         <time className="card__date" dateTime={act.date}>
-          {formatDate(act.date)}
+          {formatDateShort(act.date)}
         </time>
         <button
           type="button"
           className={`star${favorite ? ' star--on' : ''}`}
-          onClick={() => onToggleFavorite(act.id)}
+          onClick={() => onToggleFavorite(act)}
           aria-pressed={favorite}
           title={favorite ? 'Убрать из избранного' : 'В избранное'}
         >

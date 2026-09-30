@@ -8,6 +8,9 @@
   --accent-soft: #eaf1fd;
   --danger: #b42318;
   --warn: #a35a00;
+  /* Текст поверх сплошной заливки --warn. В тёмной теме --warn светлый,
+     поэтому и текст на нём тёмный: белым он не набирает контраста. */
+  --on-warn: #ffffff;
   --radius: 10px;
   color-scheme: light dark;
 }
@@ -23,6 +26,7 @@
     --accent-soft: #1b2740;
     --danger: #ff8a80;
     --warn: #e0a458;
+    --on-warn: #14181f;
   }
 }
 
@@ -175,6 +179,13 @@ a {
   font-weight: 600;
 }
 
+.switches {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 18px;
+  align-items: center;
+}
+
 .switch {
   display: inline-flex;
   align-items: center;
@@ -209,7 +220,28 @@ a {
 }
 
 .favorites-count {
+  font: inherit;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
   color: var(--warn);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.favorites-count:hover {
+  border-color: var(--warn);
+}
+
+.favorites-count--on {
+  border-color: var(--warn);
+  background: var(--warn);
+  color: var(--on-warn);
+  font-weight: 600;
 }
 
 /* --- лента по дням --- */
@@ -247,7 +279,7 @@ a {
 .day__cards {
   display: grid;
   gap: 10px;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
 }
 
 .card {
@@ -262,8 +294,9 @@ a {
 
 .card__head {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 6px 10px;
 }
 
 .card__date {
@@ -350,6 +383,7 @@ a {
 }
 
 .star {
+  flex: none;
   font-size: 18px;
   line-height: 1;
   padding: 2px 4px;

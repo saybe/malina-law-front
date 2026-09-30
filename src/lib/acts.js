@@ -45,12 +45,13 @@ export const loadFavorites = () => {
   return Array.isArray(value) ? value : []
 }
 
-export const saveFavorites = (ids) => writeJson(FAVORITES_KEY, ids)
+export const saveFavorites = (acts) => writeJson(FAVORITES_KEY, acts)
 
 export const loadPrefs = () => ({
   range: '7',
   showOther: false,
   query: '',
+  onlyFavorites: false,
   ...readJson(PREFS_KEY, {}),
 })
 
@@ -139,6 +140,52 @@ export function searchText(act) {
   return normalize([act.type, act.number, act.name, act.date].filter(Boolean).join(' '))
 }
 
+/**
+ * Приводит избранное к единому виду: массив снимков актов.
+ * Старый формат — просто список id — тоже понимается: акт подтягивается
+ * из свежих данных. Снимок, которого в items уже нет, сохраняется как есть:
+ * id живёт только внутри acts.json, и без снимка запись была бы не показать.
+ */
+export function normalizeFavorites(stored, items = []) {
+  if (!Array.isArray(stored)) return []
+
+  const byId = new Map(items.map((act) => [act.id, act]))
+  const seen = new Set()
+  const result = []
+
+  for (const entry of stored) {
+    const id = typeof entry === 'string' ? entry : entry?.id
+    if (typeof id !== 'string' || !id || seen.has(id)) continue
+
+    const fresh = byId.get(id)
+    const snapshot = fresh || entry
+    if (typeof snapshot !== 'object' || snapshot === null) continue
+    if (typeof snapshot.url !== 'string' || !snapshot.url) continue
+
+    seen.add(id)
+    result.push(snapshot)
+  }
+
+  return result
+}
+
+/**
+ * Режим «только избранное». Период и уровень намеренно игнорируются:
+ * иначе отмеченный акт старше недели прячется — и причина его отмечать исчезает.
+ * Поиск, наоборот, остаётся рабочим.
+ */
+export function selectFavorites(favorites, { query } = {}) {
+  const needle = normalize(query).trim()
+  const tokens = needle ? needle.split(/\s+/) : []
+
+  if (!tokens.length) return favorites
+
+  return favorites.filter((act) => {
+    const haystack = searchText(act)
+    return tokens.every((token) => haystack.includes(token.replace(/[«»"']/g, '')))
+  })
+}
+
 export function selectActs(items, { range, showOther, query }) {
   // «1» — только сегодня, «3» — сегодня и двое предыдущих, «0» — без ограничения.
   const from = range === '0' ? null : daysAgo(Number(range) - 1)
@@ -169,6 +216,16 @@ export function formatDate(iso) {
   const [year, month, day] = iso.split('-').map(Number)
   if (!year || !month || !day) return iso
   return `${day} ${MONTHS[month - 1]} ${year}`
+}
+
+/** «26.09.2026» — для вёрстки, где длинная дата выталкивает содержимое строки. */
+export function formatDateShort(iso) {
+  if (!iso) return ''
+  const [year, month, day] = iso.split('-').map(Number)
+  if (!year || !month || !day) return iso
+
+  const pad = (n) => String(n).padStart(2, '0')
+  return `${pad(day)}.${pad(month)}.${year}`
 }
 
 export function formatUpdatedAt(iso) {

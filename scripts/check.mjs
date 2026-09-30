@@ -12,7 +12,14 @@ import { readFile } from 'node:fs/promises'
 import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import { formatDate, searchText, selectActs } from '../src/lib/acts.js'
+import {
+  formatDate,
+  formatDateShort,
+  normalizeFavorites,
+  searchText,
+  selectActs,
+  selectFavorites,
+} from '../src/lib/acts.js'
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..')
 const DATA_FILE = resolve(ROOT, 'public/data/acts.json')
@@ -112,10 +119,63 @@ check('заведомо ложный запрос даёт 0 результат�
 const multi = selectActs(items, { range: '0', showOther: true, query: '  НАЛОГ  ' })
 check('поиск по нескольким словам и с пробелами', multi.every((i) => searchText(i).includes('налог')))
 
+console.log('\nИзбранное')
+
+const sample = items.slice(0, 3)
+const fresh = normalizeFavorites([sample[0].id], items)
+check('старый формат с id апгрейдится до снимка', fresh.length === 1 && fresh[0].name === sample[0].name)
+check('старый формат с id берёт акт из свежих данных', fresh[0] === sample[0])
+
+// Снимок, которого больше нет в acts.json, обязан выжить: id живёт только
+// внутри файла данных, акт вытесняется лимитом 200 или окном в 60 дней.
+const gone = { ...sample[1], date: '2020-01-01' }
+const kept = normalizeFavorites([gone], items.filter((i) => i.id !== sample[1].id))
+check('снимок, отсутствующий в данных, сохраняется', kept.length === 1 && kept[0].id === sample[1].id, `${kept.length}`)
+// Нет ссылки — показать акт нечем, такую запись смысла хранить нет.
+check('снимок без url отбрасывается', normalizeFavorites([{ id: 'нет-такого-акта' }], items).length === 0)
+// Известный id без url не отбрасывается: он берётся из свежих данных.
+check('известный id без url восстанавливается из данных', normalizeFavorites([{ id: sample[2].id }], items).length === 1)
+
+const stale = normalizeFavorites([gone, sample[0]], items)
+check('при наличии в данных снимок обновляется свежим', stale[1] === sample[0], stale[1]?.name)
+check('дубликаты по id схлопываются', normalizeFavorites([sample[0], sample[0].id], items).length === 1)
+check('мусор на входе не ломает нормализацию', normalizeFavorites([null, 42, {}, ''], items).length === 0)
+check('не-массив на входе даёт пустой список', normalizeFavorites(null, items).length === 0)
+
+const marked = normalizeFavorites([sample[0], sample[1]], items)
+check('selectFavorites отдаёт всё отмеченное', selectFavorites(marked, { query: '' }).length === 2)
+check(
+  'selectFavorites игнорирует период',
+  selectFavorites(marked, { query: '', range: '1' }).length === 2,
+)
+check(
+  'selectFavorites игнорирует региональные акты',
+  selectFavorites(marked, { query: '', showOther: false }).length === 2,
+)
+const token = String(sample[0].type).toLowerCase().split(/\s+/)[0]
+const found = selectFavorites(marked, { query: token })
+check(
+  'selectFavorites применяет поиск',
+  found.some((i) => i.id === sample[0].id) && found.every((i) => searchText(i).includes(token)),
+  token,
+)
+check('selectFavorites на заведомо ложном запросе пуст', selectFavorites(marked, { query: 'zzzqqq' }).length === 0)
+check('selectFavorites на пустом входе даёт пустой список', selectFavorites([], { query: '' }).length === 0)
+
+// Избранное должно переживать смену acts.json: снимок в localStorage не зависит
+// от того, остался ли акт в свежей выдаче портала.
+const oldest = [...items].sort((a, b) => a.date.localeCompare(b.date))[0]
+const survives = normalizeFavorites([oldest], [])
+check('избранное переживает пустую выдачу', survives.length === 1 && survives[0].url === oldest.url)
+
 console.log('\nФорматирование')
 check('formatDate разбирает дату', formatDate('2026-09-26') === '26 сентября 2026', formatDate('2026-09-26'))
 check('formatDate не падает на мусоре', formatDate('мусор') === 'мусор')
 check('formatDate не падает на пустом значении', formatDate(undefined) === '')
+check('formatDateShort разбирает дату', formatDateShort('2026-09-26') === '26.09.2026', formatDateShort('2026-09-26'))
+check('formatDateShort дополняет день и месяц нулём', formatDateShort('2026-01-05') === '05.01.2026', formatDateShort('2026-01-05'))
+check('formatDateShort не падает на мусоре', formatDateShort('мусор') === 'мусор')
+check('formatDateShort не падает на пустом значении', formatDateShort(undefined) === '')
 
 console.log(
   `\n${failures === 0 ? 'Все проверки пройдены' : `Провалено проверок: ${failures}`}` +

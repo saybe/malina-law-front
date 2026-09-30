@@ -7,25 +7,27 @@ import {
   loadActs,
   loadFavorites,
   loadPrefs,
+  normalizeFavorites,
   saveFavorites,
   savePrefs,
   selectActs,
+  selectFavorites,
   today,
 } from './lib/acts.js'
 
-const DEFAULT_PREFS = { range: '7', showOther: false, query: '' }
+const DEFAULT_PREFS = { range: '7', showOther: false, query: '', onlyFavorites: false }
 
 export default function App() {
   const [payload, setPayload] = useState(null)
   const [status, setStatus] = useState('loading')
   const [fromCache, setFromCache] = useState(false)
   const [prefs, setPrefs] = useState(DEFAULT_PREFS)
-  const [favorites, setFavorites] = useState([])
+  const [storedFavorites, setStoredFavorites] = useState([])
 
   // Настройки и избранное живут только в браузере.
   useEffect(() => {
     setPrefs({ ...DEFAULT_PREFS, ...loadPrefs() })
-    setFavorites(loadFavorites())
+    setStoredFavorites(loadFavorites())
   }, [])
 
   const refresh = useCallback(async () => {
@@ -52,13 +54,24 @@ export default function App() {
     })
   }, [])
 
-  const toggleFavorite = useCallback((id) => {
-    setFavorites((prev) => {
-      const next = prev.includes(id) ? prev.filter((value) => value !== id) : [...prev, id]
+  const items = payload?.items ?? []
+
+  // Хранится снимок акта, а не только его id: id существует лишь внутри
+  // текущего acts.json, и акт, вытесненный лимитом 200 или окном в 60 дней,
+  // иначе было бы уже нечего показать.
+  const favorites = useMemo(() => normalizeFavorites(storedFavorites, items), [storedFavorites, items])
+
+  // toggleFavorite читает favorites из замыкания, поэтому зависит от него.
+  const toggleFavorite = useCallback(
+    (act) => {
+      const next = favorites.some((value) => value.id === act.id)
+        ? favorites.filter((value) => value.id !== act.id)
+        : [act, ...favorites]
+      setStoredFavorites(next)
       saveFavorites(next)
-      return next
-    })
-  }, [])
+    },
+    [favorites],
+  )
 
   const reset = useCallback(() => {
     setPrefs((prev) => {
@@ -67,9 +80,10 @@ export default function App() {
     })
   }, [])
 
-  const items = payload?.items ?? []
-
-  const visible = useMemo(() => selectActs(items, prefs), [items, prefs])
+  const visible = useMemo(
+    () => (prefs.onlyFavorites ? selectFavorites(favorites, prefs) : selectActs(items, prefs)),
+    [favorites, items, prefs],
+  )
 
   // Группировка по дате: так список читается как хроника.
   const groups = useMemo(() => {
@@ -117,7 +131,10 @@ export default function App() {
         <>
           <Toolbar
             prefs={prefs}
-            counts={{ visible: visible.length, total: items.length }}
+            counts={{
+              visible: visible.length,
+              total: prefs.onlyFavorites ? favorites.length : items.length,
+            }}
             favoriteCount={favorites.length}
             onChange={changePrefs}
             onReset={reset}
@@ -139,8 +156,12 @@ export default function App() {
 
           {visible.length === 0 ? (
             <p className="notice">
-              Ничего не найдено. Попробуйте расширить период или изменить запрос.
-              {payload?.cutoff && ` Данные доступны с ${formatDate(payload.cutoff)}.`}
+              {prefs.onlyFavorites
+                ? favorites.length === 0
+                  ? 'В избранном пока ничего нет. Нажмите на звезду у карточки, чтобы сохранить акт.'
+                  : 'Ничего не найдено среди избранного. Попробуйте изменить запрос.'
+                : 'Ничего не найдено. Попробуйте расширить период или изменить запрос.'}
+              {!prefs.onlyFavorites && payload?.cutoff && ` Данные доступны с ${formatDate(payload.cutoff)}.`}
             </p>
           ) : (
             <main className="feed">
