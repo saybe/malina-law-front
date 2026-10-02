@@ -1,0 +1,32 @@
+/*
+ * Примитив кнопки. Общий для Toolbar и Freshness, поэтому лежит в shared,
+ * а не рядом с одним из них.
+ *
+ * База и модификаторы обязаны быть в этом же файле: у .button и .button--ghost
+ * одинаковая специфичность, и решает порядок правил.
+ */
+
+.button {
+  font: inherit;
+  font-size: 14px;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+.button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.button--ghost {
+  background: transparent;
+  color: var(--muted);
+}

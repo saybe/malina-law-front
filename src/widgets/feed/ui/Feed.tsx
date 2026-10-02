@@ -1,3 +1,4 @@
+import './Feed.css'
 import type { DateGroup } from '../model/groupByDate.ts'
 import type { ActSnapshot } from '../../../entities/act/model/select.ts'
 import DayGroup from './DayGroup.tsx'

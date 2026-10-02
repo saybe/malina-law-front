@@ -1,3 +1,4 @@
+import '../../../shared/ui/notice.css'
 import type { StaleSection } from '../../../entities/act/model/types.ts'
 import { formatDate } from '../../../shared/lib/date.ts'
 

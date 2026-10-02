@@ -1,3 +1,5 @@
+import './Toolbar.css'
+import '../../../shared/ui/button.css'
 import type { Prefs } from '../../../entities/act/model/types.ts'
 import FavoritesCount from '../../favorites/ui/FavoritesCount.tsx'
 import { RANGES } from '../model/ranges.ts'

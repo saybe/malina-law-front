@@ -1,3 +1,4 @@
+import './FavoritesCount.css'
 import type { Prefs } from '../../../entities/act/model/types.ts'
 
 /** Счётчик избранного: он же переключатель режима «Только избранное». */

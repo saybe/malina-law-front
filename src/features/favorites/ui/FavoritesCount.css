@@ -1,0 +1,26 @@
+/* Счётчик избранного: он же переключатель режима «Только избранное». */
+
+.favorites-count {
+  font: inherit;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--warn);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.favorites-count:hover {
+  border-color: var(--warn);
+}
+
+.favorites-count--on {
+  border-color: var(--warn);
+  background: var(--warn);
+  color: var(--on-warn);
+  font-weight: 600;
+}

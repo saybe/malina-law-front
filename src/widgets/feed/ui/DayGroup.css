@@ -1,0 +1,37 @@
+/* Заголовок дня, счётчик актов и сетка карточек внутри дня. */
+
+.day__title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: lowercase;
+}
+
+.day__title--today {
+  color: var(--accent);
+}
+
+.day__count {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 1px 9px;
+}
+
+.day__cards {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+}
+
+@media (max-width: 560px) {
+  .day__cards {
+    grid-template-columns: 1fr;
+  }
+}

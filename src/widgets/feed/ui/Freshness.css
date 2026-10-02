@@ -1,0 +1,27 @@
+/* Индикатор свежести данных и кнопка обновления. */
+
+.freshness {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+
+.freshness__text {
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.freshness__age {
+  color: var(--muted);
+}
+
+.freshness__warn {
+  color: var(--warn);
+}

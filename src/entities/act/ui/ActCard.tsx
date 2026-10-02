@@ -1,3 +1,4 @@
+import './ActCard.css'
 import type { ActCategory } from '../model/types.ts'
 import type { ActSnapshot } from '../model/select.ts'
 import { formatDateShort } from '../../../shared/lib/date.ts'

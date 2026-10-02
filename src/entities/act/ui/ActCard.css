@@ -1,0 +1,152 @@
+/*
+ * Карточка акта: шапка, бейдж категории, звёзда избранного, заголовок и ссылка.
+ * Тон бейджа определён в ActCard.tsx и приходит как класс badge--<tone>.
+ */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.card__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+
+.card__date {
+  margin-left: auto;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.badge {
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.badge--law {
+  background: #e7f3ea;
+  color: #1c6b39;
+}
+
+.badge--president {
+  background: #f0e9fb;
+  color: #5b32a3;
+}
+
+.badge--government {
+  background: #e6f0fb;
+  color: #1a5a9c;
+}
+
+.badge--parliament {
+  background: #fdf0e3;
+  color: #97500b;
+}
+
+.badge--court {
+  background: #fdeaea;
+  color: #a32020;
+}
+
+.badge--international {
+  background: #e8f2f4;
+  color: #14626f;
+}
+
+.badge--other {
+  background: #eceef1;
+  color: #55606e;
+}
+
+@media (prefers-color-scheme: dark) {
+  .badge--law {
+    background: #16301f;
+    color: #7fd39b;
+  }
+  .badge--president {
+    background: #241a3a;
+    color: #b79bec;
+  }
+  .badge--government {
+    background: #14263a;
+    color: #7cb6ec;
+  }
+  .badge--parliament {
+    background: #33220f;
+    color: #e0a458;
+  }
+  .badge--court {
+    background: #331616;
+    color: #f08a8a;
+  }
+  .badge--international {
+    background: #102a2f;
+    color: #6cc3d1;
+  }
+  .badge--other {
+    background: #232830;
+    color: #a4aebc;
+  }
+}
+
+.star {
+  flex: none;
+  font-size: 18px;
+  line-height: 1;
+  padding: 2px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.star--on {
+  color: var(--warn);
+}
+
+.card__title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.card__name {
+  margin: 0;
+  font-size: 14px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.card__link {
+  margin-top: auto;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.card__link:hover {
+  text-decoration: underline;
+}

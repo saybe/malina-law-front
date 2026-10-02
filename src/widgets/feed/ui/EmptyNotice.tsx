@@ -1,3 +1,4 @@
+import '../../../shared/ui/notice.css'
 import { formatDate } from '../../../shared/lib/date.ts'
 
 export interface EmptyNoticeProps {

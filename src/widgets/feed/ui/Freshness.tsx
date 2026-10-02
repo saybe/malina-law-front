@@ -1,3 +1,5 @@
+import './Freshness.css'
+import '../../../shared/ui/button.css'
 import { formatAge, formatUpdatedAt } from '../../../shared/lib/date.ts'
 
 export interface FreshnessProps {

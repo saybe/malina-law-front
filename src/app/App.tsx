@@ -1,5 +1,7 @@
 import { useCallback, useMemo, useState } from 'react'
 
+import './App.css'
+import '../shared/ui/notice.css'
 import { useFeed } from './hooks/useFeed.ts'
 import type { Prefs } from '../entities/act/model/types.ts'
 import { selectActs, selectFavorites } from '../entities/act/model/select.ts'

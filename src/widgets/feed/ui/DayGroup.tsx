@@ -1,3 +1,4 @@
+import './DayGroup.css'
 import ActCard from '../../../entities/act/ui/ActCard.tsx'
 import type { ActSnapshot } from '../../../entities/act/model/select.ts'
 import { formatDate, today } from '../../../shared/lib/date.ts'
