@@ -1,0 +1,10 @@
+dist/
+public/
+.check-out/
+.smoke-out/
+node_modules/
+package-lock.json
+
+# fetch.mjs остаётся нетронутым: в нём хрупкие регулярные выражения по кириллице,
+# и лишний diff мешает читать изменения разбора портала.
+scripts/fetch.mjs

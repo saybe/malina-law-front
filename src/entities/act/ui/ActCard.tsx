@@ -1,27 +1,48 @@
-import { formatDateShort } from '../lib/acts.js'
+import type { ActCategory } from '../model/types.ts'
+import type { ActSnapshot } from '../model/select.ts'
+import { formatDateShort } from '../../../shared/lib/date.ts'
 
-const CATEGORY_CLASS = {
+type Tone = 'law' | 'president' | 'government' | 'parliament' | 'court' | 'international' | 'other'
+
+/**
+ * Тон метки по категории. Список закрыт categories из fetch.mjs: любая
+ * неразобранная категория молча получила бы серый «other», поэтому
+ * «Акт суда» и «Послание Президента» раскиданы по своим тонам вручную.
+ */
+const CATEGORY_TONE: Partial<Record<ActCategory, Tone>> = {
   'Федеральный закон': 'law',
   'Федеральный конституционный закон': 'law',
+  Кодекс: 'law',
   'Указ Президента': 'president',
   'Распоряжение Президента': 'president',
+  'Послание Президента': 'president',
   'Постановление Правительства': 'government',
   'Распоряжение Правительства': 'government',
   'Государственная Дума': 'parliament',
   'Совет Федерации': 'parliament',
   'Конституционный Суд': 'court',
-  'Кодекс': 'law',
+  'Акт суда': 'court',
   'Международный документ': 'international',
 }
 
-export default function ActCard({ act, favorite, onToggleFavorite }) {
-  const tone = CATEGORY_CLASS[act.category] || 'other'
-  const heading = [act.type, act.number ? `№ ${act.number}` : null].filter(Boolean).join(' ')
+export interface ActCardProps {
+  act: ActSnapshot
+  favorite: boolean
+  onToggleFavorite: (act: ActSnapshot) => void
+}
+
+export default function ActCard({ act, favorite, onToggleFavorite }: ActCardProps) {
+  const tone = (act.category && CATEGORY_TONE[act.category]) || 'other'
+  // «Правовой акт» — тот же запасной текст, что подставляет fetch.mjs,
+  // когда тип не удалось разобрать.
+  const heading = [act.type || 'Правовой акт', act.number ? `№ ${act.number}` : null]
+    .filter(Boolean)
+    .join(' ')
 
   return (
     <article className="card">
       <div className="card__head">
-        <span className={`badge badge--${tone}`}>{act.category}</span>
+        <span className={`badge badge--${tone}`}>{act.category || 'Другой акт'}</span>
         <time className="card__date" dateTime={act.date}>
           {formatDateShort(act.date)}
         </time>

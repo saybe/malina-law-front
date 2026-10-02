@@ -1,6 +1,13 @@
-import { formatAge, formatUpdatedAt } from '../lib/acts.js'
+import { formatAge, formatUpdatedAt } from '../../../shared/lib/date.ts'
 
-export default function Freshness({ updatedAt, fromCache, loading, onRefresh }) {
+export interface FreshnessProps {
+  updatedAt: string | undefined
+  fromCache: boolean
+  loading: boolean
+  onRefresh: () => void
+}
+
+export default function Freshness({ updatedAt, fromCache, loading, onRefresh }: FreshnessProps) {
   return (
     <div className="freshness">
       <span className="freshness__text">

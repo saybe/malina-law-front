@@ -1,6 +1,21 @@
-import { RANGES } from '../lib/acts.js'
+import type { Prefs } from '../../../entities/act/model/types.ts'
+import FavoritesCount from '../../favorites/ui/FavoritesCount.tsx'
+import { RANGES } from '../model/ranges.ts'
 
-export default function Toolbar({ prefs, counts, favoriteCount, onChange, onReset }) {
+export interface ToolbarCounts {
+  visible: number
+  total: number
+}
+
+export interface ToolbarProps {
+  prefs: Prefs
+  counts: ToolbarCounts
+  favoriteCount: number
+  onChange: (patch: Partial<Prefs>) => void
+  onReset: () => void
+}
+
+export default function Toolbar({ prefs, counts, favoriteCount, onChange, onReset }: ToolbarProps) {
   const { range, showOther, query, onlyFavorites } = prefs
 
   return (
@@ -54,17 +69,7 @@ export default function Toolbar({ prefs, counts, favoriteCount, onChange, onRese
           <span>
             {counts.visible} из {counts.total}
           </span>
-          {favoriteCount > 0 && (
-            <button
-              type="button"
-              className={`favorites-count${onlyFavorites ? ' favorites-count--on' : ''}`}
-              aria-pressed={onlyFavorites}
-              title={onlyFavorites ? 'Показать всю ленту' : 'Показать только избранное'}
-              onClick={() => onChange({ onlyFavorites: !onlyFavorites })}
-            >
-              ★ {favoriteCount}
-            </button>
-          )}
+          <FavoritesCount count={favoriteCount} onlyFavorites={onlyFavorites} onToggle={onChange} />
           <button type="button" className="button button--ghost" onClick={onReset}>
             Сбросить
           </button>

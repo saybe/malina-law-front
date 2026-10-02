@@ -1,0 +1,12 @@
+{
+  "//": "tsc-сборка исходников в .check-out — только чтобы scripts/check.mjs мог импортировать model-модули обычным Node. Node 20 не умеет --experimental-strip-types, поэтому типы снимаются компиляцией.",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "rootDir": "src",
+    "outDir": ".check-out",
+    "declaration": false,
+    "sourceMap": false
+  },
+  "include": ["src"]
+}

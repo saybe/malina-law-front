@@ -49,9 +49,11 @@ jobs:
           echo "::warning::Публикуется предыдущая версия файла public/data/acts.json."
           echo "::warning::Если это повторяется — вероятно, раннер не достаёт до .gov.ru по HTTP."
 
+      # npm run check, а не node scripts/check.mjs: проверке нужен файл
+      # .check-out, который собирает tsc. Прямой вызов Node его не создаст.
       - name: Проверить данные
         if: steps.fetch.outcome == 'success'
-        run: node scripts/check.mjs
+        run: npm run check
 
       - name: Собрать сайт
         run: npm run build
@@ -68,6 +70,14 @@ jobs:
           git commit -m "data: акты на $(date -u +%Y-%m-%d\ %H:%M)\ UTC"
           git pull --rebase --autostash origin master
           git push origin HEAD:master
+
+      # Линтер и смоук стоят после коммита данных: сбой проверки кода не должен
+      # откатывать обновление acts.json — зато сломанная вёрстка на Pages не попадёт.
+      - name: Проверить код
+        run: npm run lint
+
+      - name: Проверить вёрстку
+        run: npm run smoke
 
       - name: Подготовить GitHub Pages
         uses: actions/configure-pages@v5
